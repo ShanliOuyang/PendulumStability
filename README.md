@@ -2,9 +2,9 @@
 
 A reinforcement learning project for stabilizing an inverted pendulum on a cart, developed during the **GEARS Summer Research Program** at **North Carolina State University (NCSU)**.
 
-## Demo
+## RL Algorithm
 
-<img width="897" height="524" alt="demo" src="https://github.com/user-attachments/assets/7a22f1df-f061-47b2-a357-c8ffaac61e1c" />
+<img width="897" height="524" alt="468073371-e31146f3-07d3-41da-aaae-12a7bb06329d" src="https://github.com/user-attachments/assets/7a22f1df-f061-47b2-a357-c8ffaac61e1c" />
 
 ## Overview
 
@@ -158,13 +158,9 @@ The trained model can be deployed to physical hardware:
 | Generalization Range (tested) | ±0.20 rad |
 | Average Episode Length | 2000+ steps |
 
-## Authors
+## Related Imformation
 
-- **Shanli Ouyang** - NCSU GEARS Program
-
-## Acknowledgments
-
-- **NCSU GEARS Summer Research Program** for funding and support
+- **Shanli Ouyang** - NCSU GEARS Program (with group members)
 - **Dr. Hien Tran** for guidance and mentorship
 
 

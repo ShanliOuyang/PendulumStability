@@ -4,7 +4,7 @@ A reinforcement learning project for stabilizing an inverted pendulum on a cart,
 
 ## RL Algorithm
 
-<img width="897" height="524" alt="468073371-e31146f3-07d3-41da-aaae-12a7bb06329d" src="https://github.com/user-attachments/assets/7a22f1df-f061-47b2-a357-c8ffaac61e1c" />
+<img width="897" height="524" alt="image" src="https://github.com/user-attachments/assets/5311cab1-b83b-4b66-8577-04ec9c76d6cb" />
 
 ## Overview
 

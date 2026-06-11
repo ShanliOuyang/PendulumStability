@@ -1,163 +1,171 @@
-# Pendulum Stability - Reinforcement Learning for Cart-Pole System
+# PendulumStability
 
-![Cart-Pole System](https://github.com/user-attachments/assets/7a22f1df-f061-47b2-a357-c8ffaac61e1c)
+A reinforcement learning project for stabilizing an inverted pendulum on a cart, developed during the **GEARS Summer Research Program** at **North Carolina State University (NCSU)**.
 
-## Project Overview
+## Demo
 
-This project is part of the **NCSU GEARS Summer Research Program**, focusing on applying **Deep Reinforcement Learning (PPO algorithm)** to solve the classic Cart-Pole balance problem. The goal is to train an agent that can keep the pendulum stable on a moving cart under various initial conditions.
+<img width="897" height="524" alt="demo" src="https://github.com/user-attachments/assets/7a22f1df-f061-47b2-a357-c8ffaac61e1c" />
 
-### Research Objectives
+## Overview
 
-1. **Stability Control**: Train a PPO agent to balance the pole indefinitely without toppling
-2. **Generalization**: Expand the acceptable range of initial states to improve model robustness
-3. **Real-world Application**: Export trained model parameters for deployment on physical hardware (MATLAB simulation)
+This project explores the application of **Proximal Policy Optimization (PPO)** to solve the cart-pole balancing problem with enhanced realism and generalization:
 
----
+- **Custom Physics Environment**: Implements accurate motor dynamics including gear ratio, back-EMF, and viscous damping
+- **Generalization Focus**: Expands the acceptable range of initial states to improve model robustness
+- **Statistical Validation**: Uses Z-tests and confidence intervals to validate model improvements
+- **Hardware Deployment**: Exports trained model parameters for MATLAB-based hardware implementation
 
 ## Project Structure
 
-Pendulum_Stability/ │ ├── myCartpoleF.py # Custom Cart-Pole environment (Gymnasium compatible) ├── Train_Result.py # PPO model training script with early stopping ├── Test_Result.py # Large-scale testing under different initial states ├── Validation.py # Statistical validation between old and new models ├── Turn-into-txt.ipynb # Export model parameters to text files (MATLAB compatible) │ ├── models/ # Saved best trained models (.zip) ├── Training/ # Training logs and intermediate model checkpoints │ ├── Logs/ # TensorBoard logs │ └── Saved Models/ # Intermediate PPO model files └── Text_Results/ # Exported model parameters (W0, b0, W1, b1, W_out, b_out)
-
-code
-
----
-
-## Environment Configuration
-
-### Custom Cart-Pole Physics (`myCartpoleF.py`)
-
-This project uses a **customized Cart-Pole environment** based on real-world hardware parameters from the NCSU lab setup.
-
-#### Key Physics Parameters
-
-| Parameter | Value | Description |
-|-----------|-------|-------------|
-| `gravity` | 9.81 m/s² | Gravitational acceleration |
-| `masscart` | 0.94 kg | Cart mass (0.57 + 0.37) |
-| `masspole` | 0.230 kg | Pendulum mass |
-| `length` | 0.3302 m | Half pole length |
-| `r_mp` | 6.35×10⁻³ m | Motor pinion radius |
-| `Kg` | 3.71 | Gearbox ratio |
-| `Rm` | 2.6 Ω | Motor armature resistance |
-| `Kt` | 0.00767 N·m/A | Motor torque constant |
-| `Km` | 0.00767 V·s/rad | Back-EMF constant |
-| `Beq` | 5.4 N·m·s/rad | Equivalent viscous damping |
-| `Bp` | 0.0024 N·m·s/rad | Pendulum axis damping |
-
-#### Action Space
-- **Type**: `Box(-1, 1)`
-- **Meaning**: Normalized voltage applied to the motor `[-10V, 10V]`
-
-#### Observation Space
-- **Type**: `Box(4)`
-- **State vector**: `[x, x_dot, θ, θ_dot]`
-  - `x`: Cart position (m)
-  - `x_dot`: Cart velocity (m/s)
-  - `θ`: Pole angle (rad)
-  - `θ_dot`: Pole angular velocity (rad/s)
-
-#### Episode Termination
-- `|θ| > 0.2 rad` (~11.5°)
-- `|x| > 0.2 m`
-- Episode length > 2000 steps (20 seconds at 100 Hz)
-
-#### Integrator
-- Uses **Runge-Kutta 4th Order (RK4)** for higher accuracy in physics simulation
-
----
+| File | Description |
+|------|-------------|
+| `myCartpoleF.py` | Custom CartPole environment with realistic physics (motor dynamics, RK4 integration) |
+| `Train_Result.py` | PPO model training with early-stopping callback based on state stability |
+| `Test_Result.py` | Large-scale testing (10,000 episodes) under varying initial conditions |
+| `Validation.py` | Statistical comparison of model versions using Z-tests |
+| `Turn-into-txt.ipynb` | Export model parameters (weights/biases) for MATLAB deployment |
+| `models/` | Trained best model (`.zip`) |
+| `Text_Results/` | Exported model parameters in text format |
+| `Training/` | Training logs and intermediate model checkpoints |
 
 ## Getting Started
 
 ### Prerequisites
 
 ```bash
-pip install gymnasium>=0.28.0
-pip install stable-baselines3>=2.0.0
-pip install numpy matplotlib statsmodels
-pip install pygame  # For rendering
-Quick Start
-1. Train a PPO Model
-bash
+pip install gymnasium stable-baselines3[extra] matplotlib statsmodels pygame jupyter
+```
+
+### Quick Start
+
+**1. Train a Model**
+
+```bash
 python Train_Result.py
-Training Features:
+```
 
-Uses PPO (Proximal Policy Optimization) with MLP policy
-Early stopping when all state variables stabilize (custom StableWindow callback)
-Automatically saves the best model to models/best_model.zip
-Hyperparameters:
-n_steps = 4096
-batch_size = 256
-n_epochs = 10
-learning_rate = 3e-3 (linear decay)
-clip_range = 0.15
-2. Test Model Generalization
-bash
+This will:
+
+- Create a custom CartPole environment with realistic physics
+- Train a PPO agent with early stopping when the pendulum stabilizes
+- Save the best model to `Training/Saved Models/best_model.zip`
+
+**2. Test the Model**
+
+```bash
 python Test_Result.py
-Testing Features:
+```
 
-Runs 10,000 test episodes for each initial state range
-Dynamically adjusts the environment's initial state distribution
-Exports results to Episode_State/episode_results_range_X.csv
-Success criteria: Balance rate ≥ 40% AND episode length ≥ 1000 steps
-3. Validate Model Improvement (Statistical Testing)
-bash
+This will:
+
+- Run 10,000 test episodes with varying initial conditions
+- Dynamically expand the initial state range to test generalization
+- Save results to `Episode_State/episode_results_range_*.csv`
+
+**3. Validate Model Performance**
+
+```bash
 python Validation.py
-Validation Features:
+```
 
-Compares old_model vs new_model with 100,000 test episodes each
-Performs Z-test for two proportions (one-tailed, α = 0.05)
-Calculates 95% Wilson confidence intervals
-Outputs statistical recommendation on whether to continue training
-4. Export Model to MATLAB
-bash
-jupyter notebook Turn-into-txt.ipynb
-Exported Files (in Text_Results/):
+This will:
 
-W0.txt, b0.txt - Layer 1 weights and biases
-W1.txt, b1.txt - Layer 2 weights and biases
-W_out.txt, b_out.txt - Output layer weights and biases
-Results & Performance
-Training Curve
-The model typically achieves stable balancing after ~500,000 timesteps.
+- Compare "old" and "new" models using 100,000 test episodes
+- Perform Z-test for statistical significance
+- Output confidence intervals and improvement recommendations
 
-Generalization Test Results
-Initial Range (±)	Success Rate	Notes
-0.08	~95%	Easy initialization
-0.12	~85%	Moderate difficulty
-0.16	~70%	Challenging
-0.20	~50%	Near failure boundary
-Statistical Validation
-The Validation.py script uses proportions_ztest to determine if a new model significantly outperforms the old one (p < 0.05).
+**4. Export for Hardware Deployment**
 
-Key Technical Details
-PPO Network Architecture
-code
-Input (4) → [64, Tanh] → [64, Tanh] → Output (1)
-                   ↓
-            Value Function (shared layers)
-Actor network: Outputs continuous action [-1, 1]
-Critic network: Outputs state value estimate
-Reward Design
-+1 for each step the pole remains upright
-Episode terminates when the pole falls or cart goes out of bounds
-Custom Callbacks (Train_Result.py)
-StableWindow: Monitors if a state variable stabilizes within a tolerance window
-AndCallback: Stops training when all 4 state variables are stable
-EvalCallback: Saves the best model based on evaluation performance
-Directory Details
-models/
-Contains the final trained PPO model (best_model.zip) ready for deployment.
+Open `Turn-into-txt.ipynb` in Jupyter and run all cells to export model parameters to `Text_Results/`.
 
-Training/Logs/
-TensorBoard logs for monitoring training progress:
+## Methodology
 
-bash
-tensorboard --logdir=Training/Logs/
-Training/Saved Models/
-Intermediate model checkpoints saved during training.
+### Custom Environment
 
-Text_Results/
-MATLAB-compatible model parameters for hardware deployment and simulation.
+The `myCartpoleF.py` extends Gymnasium's CartPole with:
 
-Research Context
-This project is developed as part of the GEARS (Global Engineering Academic Research Scholarship) program at North Carolina State University (NCSU).
+1. **Realistic Motor Dynamics** with parameters from Emi's thesis:
+   - Motor pinion radius: 6.35e-3 m
+   - Rotor moment of inertia: 3.90e-7 kg·m²
+   - Planetary gearbox ratio: 3.71
+   - Motor armature resistance: 2.6 Ω
+   - Motor torque constant: 0.00767 N·m/A
+
+2. **Numerical Integration** (RK4 or Semi-Implicit Euler)
+
+3. **Flexible Reset Bounds** for domain randomization
+
+### Training Strategy
+
+- **Algorithm**: PPO with MLP policy
+- **Early Stopping**: Custom `StableWindow` callback monitors state stability
+- **Key Hyperparameters**:
+  - `n_steps = 4096`
+  - `batch_size = 256`
+  - `learning_rate = 3e-3` (linear decay)
+  - `clip_range = 0.15`
+
+### Generalization Testing
+
+Tests model robustness by gradually expanding initial state ranges:
+
+```
+Initial Range: ±0.08 → ±0.10 → ±0.12 → ... → ±0.20
+```
+
+Success criteria:
+
+- Balance rate ≥ 40%
+- Episode length ≥ 1000 steps
+
+### Statistical Validation
+
+Uses **proportions Z-test** to compare model versions:
+
+- **H₀**: New model success rate ≤ Old model success rate
+- **H₁**: New model success rate > Old model success rate
+- **Significance level**: α = 0.05
+- **Confidence intervals**: Wilson method
+
+## Physics Background
+
+The equations of motion are derived from Lagrangian mechanics with motor dynamics.
+
+**State Vector**: `[x, x_dot, theta, theta_dot]` (cart position, velocity, pole angle, angular velocity)
+
+**Termination Conditions**:
+
+- `|theta| > 0.2 rad` (~11.5°)
+- `|x| > 0.2 m`
+- Episode length > 2000 steps
+
+## Hardware Deployment
+
+The trained model can be deployed to physical hardware:
+
+1. **Export Parameters**: Run `Turn-into-txt.ipynb`
+2. **Generated Files**:
+   - `W0.txt`, `b0.txt` - Layer 1 weights and biases
+   - `W1.txt`, `b1.txt` - Layer 2 weights and biases
+   - `W_out.txt`, `b_out.txt` - Output layer weights and biases
+3. **MATLAB Integration**: Load text files and implement forward pass
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| Success Rate (within training distribution) | ~95% |
+| Generalization Range (tested) | ±0.20 rad |
+| Average Episode Length | 2000+ steps |
+
+## Authors
+
+- **Shanli Ouyang** - NCSU GEARS Program
+
+## Acknowledgments
+
+- **NCSU GEARS Summer Research Program** for funding and support
+- **Dr. Hien Tran** for guidance and mentorship
+
+
+

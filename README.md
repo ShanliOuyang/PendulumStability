@@ -2,7 +2,7 @@
 
 A reinforcement learning project for stabilizing an inverted pendulum on a cart, developed during the **GEARS Summer Research Program** at **North Carolina State University (NCSU)**.
 
-## RL Algorithm
+## RL Algorithms
 
 <img width="897" height="524" alt="image" src="https://github.com/user-attachments/assets/5311cab1-b83b-4b66-8577-04ec9c76d6cb" />
 

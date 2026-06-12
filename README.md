@@ -2,9 +2,26 @@
 
 A reinforcement learning project for stabilizing an inverted pendulum on a cart, developed during the **GEARS Summer Research Program** at **North Carolina State University (NCSU)**.
 
-## RL Algorithms
+## Table of Contents
 
-<img width="897" height="524" alt="image" src="https://github.com/user-attachments/assets/5311cab1-b83b-4b66-8577-04ec9c76d6cb" />
+- [Demo](#demo)
+- [Overview](#overview)
+- [Core Features](#core-features)
+- [Project Structure](#project-structure)
+- [Algorithms and Methods](#algorithms-and-methods)
+- [Getting Started](#getting-started)
+- [Methodology](#methodology)
+- [Workflow](#workflow)
+- [Physics Background](#physics-background)
+- [Hardware Deployment](#hardware-deployment)
+- [Outputs](#outputs)
+- [Results](#results)
+- [Authors](#authors)
+- [Acknowledgments](#acknowledgments)
+
+## Demo
+
+<img width="897" height="524" alt="demo" src="https://github.com/user-attachments/assets/7a22f1df-f061-47b2-a357-c8ffaac61e1c" />
 
 ## Overview
 
@@ -15,11 +32,23 @@ This project explores the application of **Proximal Policy Optimization (PPO)** 
 - **Statistical Validation**: Uses Z-tests and confidence intervals to validate model improvements
 - **Hardware Deployment**: Exports trained model parameters for MATLAB-based hardware implementation
 
+## Core Features
+
+- **Custom continuous-control CartPole environment** built on Gymnasium
+- **Physics-aware dynamics model** including motor voltage input, gearbox ratio, viscous damping, and pendulum-cart coupling
+- **Continuous action space** where the policy outputs normalized motor commands that are scaled into actuator force
+- **PPO-based policy training** with Stable-Baselines3
+- **Early stopping based on state stability** using custom callbacks that monitor cart position, cart velocity, pole angle, and pole angular velocity
+- **Robustness testing under wider reset ranges** to evaluate generalization outside the default training distribution
+- **Statistical model comparison** using large-sample proportion testing and Wilson confidence intervals
+- **Parameter export pipeline** for downstream MATLAB or hardware-side inference
+- **Training logs and saved checkpoints** for model tracking and reuse
+
 ## Project Structure
 
 | File | Description |
 |------|-------------|
-| `myCartpoleF.py` | Custom CartPole environment with realistic physics (motor dynamics, RK4 integration) |
+| `myCartpoleF.py` | Custom CartPole environment with actuator-aware physics and rendering support |
 | `Train_Result.py` | PPO model training with early-stopping callback based on state stability |
 | `Test_Result.py` | Large-scale testing (10,000 episodes) under varying initial conditions |
 | `Validation.py` | Statistical comparison of model versions using Z-tests |
@@ -27,6 +56,38 @@ This project explores the application of **Proximal Policy Optimization (PPO)** 
 | `models/` | Trained best model (`.zip`) |
 | `Text_Results/` | Exported model parameters in text format |
 | `Training/` | Training logs and intermediate model checkpoints |
+
+## Algorithms and Methods
+
+### Reinforcement Learning Algorithm
+
+- **Algorithm**: Proximal Policy Optimization (**PPO**)
+- **Implementation**: `stable_baselines3.PPO`
+- **Policy Type**: `MlpPolicy`
+- **Action Type**: continuous 1D action in `[-1, 1]`, scaled to motor force
+
+### Environment Modeling
+
+The environment in `myCartpoleF.py` extends the classic CartPole setting by replacing the standard simplified force model with a more realistic actuator-aware dynamics model. The implementation includes:
+
+- cart-pole nonlinear dynamics
+- motor torque and back-EMF terms
+- gearbox ratio and pinion radius
+- equivalent viscous damping at the motor and pendulum axis
+- configurable reset ranges for the initial state
+
+### Numerical Update Strategy
+
+The code uses a high-frequency simulation step (`100 Hz`) and updates the state with the environment's custom physics routine. The script labels the integrator as `RK4`, while the actual state update path in the current code follows a semi-implicit Euler-style update sequence.
+
+### Early-Stopping Logic
+
+`Train_Result.py` defines two custom callback classes:
+
+- `StableWindow`: tracks whether one state signal stays within a tolerance window for a fixed number of steps
+- `AndCallback`: combines multiple `StableWindow` instances and stops training when all monitored signals are stable at the same time
+
+This makes training stop based on behavioral stability rather than only a reward threshold.
 
 ## Getting Started
 
@@ -46,9 +107,10 @@ python Train_Result.py
 
 This will:
 
-- Create a custom CartPole environment with realistic physics
-- Train a PPO agent with early stopping when the pendulum stabilizes
-- Save the best model to `Training/Saved Models/best_model.zip`
+- Register the custom `CartPoleLab` environment
+- Run a short environment sanity check with rendering
+- Train a PPO agent with callback-based early stopping
+- Save evaluation-selected and final models to the `models/` and `Training/Saved Models/` folders
 
 **2. Test the Model**
 
@@ -60,7 +122,7 @@ This will:
 
 - Run 10,000 test episodes with varying initial conditions
 - Dynamically expand the initial state range to test generalization
-- Save results to `Episode_State/episode_results_range_*.csv`
+- Save episode-level initial-state labels to `Episode_State/episode_results_range_*.csv`
 
 **3. Validate Model Performance**
 
@@ -127,6 +189,16 @@ Uses **proportions Z-test** to compare model versions:
 - **Significance level**: α = 0.05
 - **Confidence intervals**: Wilson method
 
+## Workflow
+
+The repository is organized around a practical training-to-validation workflow:
+
+1. `myCartpoleF.py` defines the custom environment and the physical system dynamics.
+2. `Train_Result.py` registers the environment, trains a PPO policy, evaluates it during training, and saves model checkpoints.
+3. `Test_Result.py` reloads the trained model and stress-tests it under progressively larger reset ranges.
+4. `Validation.py` compares two saved model versions statistically using repeated rollout experiments.
+5. `Turn-into-txt.ipynb` exports trained network parameters into plain-text files for external use.
+
 ## Physics Background
 
 The equations of motion are derived from Lagrangian mechanics with motor dynamics.
@@ -150,6 +222,16 @@ The trained model can be deployed to physical hardware:
    - `W_out.txt`, `b_out.txt` - Output layer weights and biases
 3. **MATLAB Integration**: Load text files and implement forward pass
 
+## Outputs
+
+During normal use, the project can generate the following artifacts:
+
+- **Saved models**: PPO checkpoints in `models/` and `Training/Saved Models/`
+- **Training logs**: TensorBoard-compatible logs in `Training/Logs/`
+- **Episode test CSVs**: success labels and initial states for generalization tests
+- **Text parameter dumps**: weight and bias matrices in `Text_Results/`
+- **Interactive visualization**: Pygame rendering for environment inspection and evaluation
+
 ## Results
 
 | Metric | Value |
@@ -158,10 +240,7 @@ The trained model can be deployed to physical hardware:
 | Generalization Range (tested) | ±0.20 rad |
 | Average Episode Length | 2000+ steps |
 
-## Related Imformation
+## Authors
 
-- **Shanli Ouyang** - NCSU GEARS Program (with group members)
+- **Shanli Ouyang** - *Initial work* - NCSU GEARS Program
 - **Dr. Hien Tran** for guidance and mentorship
-
-
-

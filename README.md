@@ -1,4 +1,4 @@
-# PendulumStability
+<img width="897" height="524" alt="image" src="https://github.com/user-attachments/assets/9c4ea386-6c42-4c9a-944e-7dc17eb3ac31" /># PendulumStability
 
 A reinforcement learning project for stabilizing an inverted pendulum on a cart, developed during the **GEARS Summer Research Program** at **North Carolina State University (NCSU)**.
 
@@ -19,10 +19,6 @@ A reinforcement learning project for stabilizing an inverted pendulum on a cart,
 - [Authors](#authors)
 - [Acknowledgments](#acknowledgments)
 
-## Demo
-
-<img width="897" height="524" alt="demo" src="https://github.com/user-attachments/assets/7a22f1df-f061-47b2-a357-c8ffaac61e1c" />
-
 ## Overview
 
 This project explores the application of **Proximal Policy Optimization (PPO)** to solve the cart-pole balancing problem with enhanced realism and generalization:
@@ -31,6 +27,8 @@ This project explores the application of **Proximal Policy Optimization (PPO)** 
 - **Generalization Focus**: Expands the acceptable range of initial states to improve model robustness
 - **Statistical Validation**: Uses Z-tests and confidence intervals to validate model improvements
 - **Hardware Deployment**: Exports trained model parameters for MATLAB-based hardware implementation
+
+<img width="897" height="524" alt="image" src="https://github.com/user-attachments/assets/fa65190e-a743-4110-84c0-d49d5c505ee2" />
 
 ## Core Features
 

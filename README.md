@@ -1,4 +1,4 @@
-<img width="897" height="524" alt="image" src="https://github.com/user-attachments/assets/9c4ea386-6c42-4c9a-944e-7dc17eb3ac31" /># PendulumStability
+# PendulumStability
 
 A reinforcement learning project for stabilizing an inverted pendulum on a cart, developed during the **GEARS Summer Research Program** at **North Carolina State University (NCSU)**.
 
